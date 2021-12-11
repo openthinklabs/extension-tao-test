@@ -5,7 +5,7 @@
             "url": "git@github.com:oat-sa/oatbox-extension-installer.git"
         }
     ],
-    "name": "oat-sa/extension-tao-test",
+    "name": "openthinklabs/extension-tao-test",
     "authors": [
         {
             "name": "Open Assessment Technologies S.A.",
