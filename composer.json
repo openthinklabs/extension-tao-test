@@ -2,7 +2,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:oat-sa/oatbox-extension-installer.git"
+            "url": "git@github.com:openthinklabs/oatbox-extension-installer.git"
         }
     ],
     "name": "openthinklabs/extension-tao-test",
@@ -62,8 +62,8 @@
     },
     "require": {
         "openthinklabs/oatbox-extension-installer": "~1.1||dev-master",
-        "openthinklabs/generis": ">=15.13.0",
-        "openthinklabs/tao-core": ">=48.70.0",
+        "openthinklabs/generis": ">=15.13.1",
+        "openthinklabs/tao-core": ">=48.75.0",
         "openthinklabs/extension-tao-backoffice": ">=6.0.0",
         "openthinklabs/extension-tao-item": ">=11.0.0"
     },
