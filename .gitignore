@@ -64,3 +64,8 @@ vendor/
 
 composer.lock
 .idea/
+
+generis/
+tao/
+taoBackOffice/
+taoItems/
