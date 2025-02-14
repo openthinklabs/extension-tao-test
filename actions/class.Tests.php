@@ -1,5 +1,6 @@
 <?php
 
+// phpcs:disable Generic.Files.LineLength
 /*
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,15 +21,19 @@
  *               2009-2012 (update and modification) Public Research Centre Henri Tudor (under the project TAO-SUSTAIN & TAO-DEV);
  *
  */
+// phpcs:enable
 
 use oat\oatbox\event\EventManager;
 use oat\tao\model\lock\LockManager;
 use oat\oatbox\validator\ValidatorInterface;
 use oat\tao\model\resources\ResourceWatcher;
+use oat\tao\model\TaoOntology;
 use oat\taoTests\models\event\TestUpdatedEvent;
 use oat\tao\model\controller\SignedFormInstance;
 use oat\tao\model\resources\Service\ClassDeleter;
 use oat\tao\model\routing\AnnotationReader\security;
+use oat\taoTests\models\Form\Modifier\FormModifierProxy;
+use oat\taoTests\models\Translation\Form\Modifier\TranslationFormModifierProxy;
 use tao_helpers_form_FormContainer as FormContainer;
 use oat\generis\model\resource\Service\ResourceDeleter;
 use oat\tao\model\resources\Contract\ClassDeleterInterface;
@@ -36,6 +41,7 @@ use oat\generis\model\resource\Contract\ResourceDeleterInterface;
 use oat\generis\model\resource\exception\ResourceDeletionException;
 use oat\tao\model\resources\Exception\PartialClassDeletionException;
 use oat\tao\model\Lists\Business\Validation\DependsOnPropertyValidator;
+use oat\tao\model\Translation\Service\TranslationSyncService;
 
 /**
  * Tests Controller provide actions performed from url resolution
@@ -46,9 +52,9 @@ use oat\tao\model\Lists\Business\Validation\DependsOnPropertyValidator;
  * @license GPLv2  http://www.opensource.org/licenses/gpl-2.0.php
  *
  */
+// phpcs:ignore
 class taoTests_actions_Tests extends tao_actions_SaSModule
 {
-
     /**
      * @return EventManager
      */
@@ -111,9 +117,18 @@ class taoTests_actions_Tests extends tao_actions_SaSModule
                             $this->getDependsOnPropertyValidator(),
                         ],
                     ],
+                    FormContainer::FORM_MODIFIERS => [
+                        FormModifierProxy::class,
+                        TranslationFormModifierProxy::class,
+                    ],
                 ]
             );
             $myForm = $formContainer->getForm();
+
+            $myForm->setOptions([
+                'resourceType' => TaoOntology::CLASS_URI_TEST
+            ]);
+
             if ($myForm->isSubmited() && $myForm->isValid()) {
                 $this->validateInstanceRoot($test->getUri());
 
@@ -227,6 +242,24 @@ class taoTests_actions_Tests extends tao_actions_SaSModule
             if (!empty($authoringUrl)) {
                 $userId = common_session_SessionManager::getSession()->getUser()->getIdentifier();
                 LockManager::getImplementation()->setLock($test, $userId);
+
+                // Add support for the translation and the side-by-side authoring tool
+                if ($this->getRequestParameter('translation') !== null) {
+                    $authoringUrl = sprintf(
+                        '%s&translation=%s',
+                        $authoringUrl,
+                        $this->getRequestParameter('translation')
+                    );
+                }
+                if ($this->getRequestParameter('originResourceUri') !== null) {
+                    $this->getTranslationSyncService()->syncById($this->getRequestParameter('originResourceUri'));
+                    $authoringUrl = sprintf(
+                        '%s&originResourceUri=%s',
+                        $authoringUrl,
+                        $this->getRequestParameter('originResourceUri')
+                    );
+                }
+
                 return $this->forwardUrl($authoringUrl);
             }
             throw new common_exception_NoImplementation();
@@ -299,5 +332,10 @@ class taoTests_actions_Tests extends tao_actions_SaSModule
     private function getResourceDeleter(): ResourceDeleterInterface
     {
         return $this->getPsrContainer()->get(ResourceDeleter::class);
+    }
+
+    private function getTranslationSyncService(): TranslationSyncService
+    {
+        return $this->getPsrContainer()->get(TranslationSyncService::class);
     }
 }

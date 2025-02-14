@@ -1,4 +1,7 @@
 <?php
+
+// phpcs:disable Generic.Files.LineLength
+
 $GLOBALS['__l10n'][" and "] = "e";
 $GLOBALS['__l10n'][" has been deleted successfully"] = " è stato rimosso correttamente";
 $GLOBALS['__l10n'][" has been installed"] = " è stato installato";
@@ -109,7 +112,7 @@ $GLOBALS['__l10n']["Date"] = "Data";
 $GLOBALS['__l10n']["Default search"] = "Ricerca di default";
 $GLOBALS['__l10n']["Default user cannot be deleted"] = "L'utilizzatore di default non può essere eliminato";
 $GLOBALS['__l10n']["Define the default values"] = "Definisci i valori di default";
-$GLOBALS['__l10n']["Delete"] = "Cancella";
+$GLOBALS['__l10n']["Delete"] = "Elimina";
 $GLOBALS['__l10n']["Deliveries"] = "Somministrazioni";
 $GLOBALS['__l10n']["Demo Sandbox"] = "Demo Sandbox";
 $GLOBALS['__l10n']["Disabled %s"] = "Disabilitata %s";

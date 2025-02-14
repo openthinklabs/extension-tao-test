@@ -26,7 +26,6 @@ use oat\oatbox\event\Event;
 
 class TestCreatedEvent implements Event, JsonSerializable
 {
-
     /** @var  string */
     protected $testUri;
 
@@ -46,6 +45,11 @@ class TestCreatedEvent implements Event, JsonSerializable
     public function getName()
     {
         return get_class($this);
+    }
+
+    public function getTestUri(): string
+    {
+        return $this->testUri;
     }
 
     /**

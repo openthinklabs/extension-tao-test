@@ -25,6 +25,11 @@ define(function(){
             'actions' : {
                 'editTest' : 'controller/tests/editTest'
             }
-        }
+        },
+        'TestImport' : {
+            'actions' : {
+                'index' : 'controller/testImport/index'
+            }
+        },
     };
 });

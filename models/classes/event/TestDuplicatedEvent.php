@@ -26,7 +26,6 @@ use oat\oatbox\event\Event;
 
 class TestDuplicatedEvent implements Event, JsonSerializable
 {
-
     /** @var  string */
     protected $testUri;
 
@@ -67,5 +66,10 @@ class TestDuplicatedEvent implements Event, JsonSerializable
             'testUri' => $this->testUri,
             'cloneUri' => $this->cloneUri
         ];
+    }
+
+    public function getCloneUri(): string
+    {
+        return $this->cloneUri;
     }
 }

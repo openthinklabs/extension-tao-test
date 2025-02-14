@@ -15,13 +15,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2002-2008 (original work) Public Research Centre Henri Tudor & University of Luxembourg (under the project TAO & TAO2);
- *               2008-2010 (update and modification) Deutsche Institut für Internationale Pädagogische Forschung (under the project TAO-TRANSFER);
- *               2009-2012 (update and modification) Public Research Centre Henri Tudor (under the project TAO-SUSTAIN & TAO-DEV);
- *
+ * Copyright (c) 2002-2008 (original work) Public Research Centre Henri Tudor & University of Luxembourg
+ *                         (under the project TAO & TAO2);
+ *               2008-2010 (update and modification) Deutsche Institut für Internationale Pädagogische Forschung
+ *                         (under the project TAO-TRANSFER);
+ *               2009-2012 (update and modification) Public Research Centre Henri Tudor
+ *                         (under the project TAO-SUSTAIN & TAO-DEV);
+ *               2012-2025 (update and modification) Open Assessment Technologies SA;
  */
 
+use oat\tao\model\featureFlag\FeatureFlagChecker;
 use oat\taoTests\models\MissingTestmodelException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use tao_models_classes_export_ExportHandler as ExportHandlerInterface;
 
 /**
  * This controller provide the actions to export tests
@@ -33,6 +40,8 @@ use oat\taoTests\models\MissingTestmodelException;
  */
 class taoTests_actions_TestExport extends tao_actions_Export
 {
+    private const FEATURE_FLAG_QTI3_EXPORT = 'FEATURE_FLAG_QTI3_EXPORT';
+
     /**
      * overwrite the parent index to add the requiresRight for Tests
      *
@@ -43,11 +52,11 @@ class taoTests_actions_TestExport extends tao_actions_Export
     {
         parent::index();
     }
-    
+
     protected function getAvailableExportHandlers()
     {
         $returnValue = parent::getAvailableExportHandlers();
-        
+
         $resources = $this->getResourcesToExport();
         $testModels = [];
         foreach ($resources as $resource) {
@@ -62,11 +71,30 @@ class taoTests_actions_TestExport extends tao_actions_Export
             $impl = taoTests_models_classes_TestsService::singleton()->getTestModelImplementation($model);
             if (in_array('tao_models_classes_export_ExportProvider', class_implements($impl))) {
                 foreach ($impl->getExportHandlers() as $handler) {
-                    array_unshift($returnValue, $handler);
+                    if ($this->isHandlerEnabled($handler)) {
+                        array_unshift($returnValue, $handler);
+                    }
                 }
             }
         }
-        
+
         return $returnValue;
+    }
+
+    /**
+     * TODO: This was created only to temporary handle QTI3 Export feature. Will be removed.
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    private function isHandlerEnabled(ExportHandlerInterface $handler): bool
+    {
+        if (
+            !$this->getPsrContainer()->get(FeatureFlagChecker::class)->isEnabled(self::FEATURE_FLAG_QTI3_EXPORT)
+            && $handler instanceof oat\taoQtiTest\models\export\Formats\Package3p0\TestPackageExport
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -14,32 +15,42 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2002-2008 (original work) Public Research Centre Henri Tudor & University of Luxembourg (under the project TAO & TAO2);
- *               2008-2010 (update and modification) Deutsche Institut für Internationale Pädagogische Forschung (under the project TAO-TRANSFER);
- *               2009-2012 (update and modification) Public Research Centre Henri Tudor (under the project TAO-SUSTAIN & TAO-DEV);
- *               2013-     (update and modification) Open Assessment Technologies SA;
+ * Copyright (c) 2002-2008 (original work) Public Research Centre Henri Tudor & University of Luxembourg
+ *                         (under the project TAO & TAO2);
+ *               2008-2010 (update and modification) Deutsche Institut für Internationale Pädagogische Forschung
+ *                         (under the project TAO-TRANSFER);
+ *               2009-2012 (update and modification) Public Research Centre Henri Tudor
+ *                         (under the project TAO-SUSTAIN & TAO-DEV);
+ *               2013-2023 (update and modification) Open Assessment Technologies SA.
  */
 
 /*
  * @author CRP Henri Tudor - TAO Team - {@link http://www.tao.lu}
  * @license GPLv2  http://www.opensource.org/licenses/gpl-2.0.php
- *
  */
 
+use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\user\TaoRoles;
-use oat\taoTests\scripts\update\Updater;
-use oat\taoTests\scripts\install\SetupProvider;
+use oat\taoTests\models\Copier\CopierServiceProvider;
+use oat\taoTests\models\Form\ServiceProvider\FormServiceProvider;
+use oat\taoTests\models\Translation\ServiceProvider\TranslationServiceProvider;
+use oat\taoTests\models\user\TaoTestsRoles;
 use oat\taoTests\scripts\install\RegisterFrontendPaths;
 use oat\taoTests\scripts\install\RegisterTestPluginService;
-use oat\taoTests\scripts\install\RegisterTestProviderService;
 use oat\taoTests\scripts\install\RegisterTestPreviewerRegistryService;
+use oat\taoTests\scripts\install\RegisterTestProviderService;
+use oat\taoTests\scripts\install\SetupEventListeners;
+use oat\taoTests\scripts\install\SetupProvider;
+use oat\taoTests\scripts\install\SetupSectionVisibilityFilters;
+use oat\taoTests\scripts\update\Updater;
 
 $extpath = __DIR__ . DIRECTORY_SEPARATOR;
 
 return [
     'name' => 'taoTests',
     'label' => 'Test core extension',
-    'description' => 'TAO Tests extension contains the abstraction of the test-runners, but requires an implementation in order to be able to run tests',
+    'description' => 'TAO Tests extension contains the abstraction of the test-runners, but requires an implementation '
+        . 'in order to be able to run tests',
     'license' => 'GPL-2.0',
     'author' => 'Open Assessment Technologies, CRP Henri Tudor',
     'models' => [
@@ -55,13 +66,51 @@ return [
             RegisterFrontendPaths::class,
             RegisterTestPreviewerRegistryService::class,
             SetupProvider::class,
+            SetupEventListeners::class,
+            SetupSectionVisibilityFilters::class
         ],
     ],
     'update' => Updater::class,
-    'managementRole' => 'http://www.tao.lu/Ontologies/TAOTest.rdf#TestsManagerRole',
+    'managementRole' => TaoTestsRoles::TEST_MANAGER,
     'acl' => [
-        ['grant', 'http://www.tao.lu/Ontologies/TAOTest.rdf#TestsManagerRole', ['ext' => 'taoTests']],
-        ['grant', TaoRoles::REST_PUBLISHER, ['ext' => 'taoTests', 'mod' => 'RestTests']],
+        [
+            AccessRule::GRANT,
+            TaoTestsRoles::TEST_MANAGER,
+            ['ext' => 'taoTests']
+        ],
+        [
+            AccessRule::GRANT,
+            TaoRoles::REST_PUBLISHER,
+            ['ext' => 'taoTests', 'mod' => 'RestTests']
+        ],
+        [
+            AccessRule::GRANT,
+            TaoTestsRoles::TEST_EXPORTER,
+            ['ext' => 'taoTests', 'mod' => 'TestExport']
+        ],
+        [
+            AccessRule::GRANT,
+            TaoTestsRoles::TEST_IMPORTER,
+            ['ext' => 'taoTests', 'mod' => 'TestImport']
+        ],
+        [
+            AccessRule::GRANT,
+            TaoRoles::REST_PUBLISHER,
+            ['ext' => 'taoTests', 'mod' => 'RestTests']
+        ],
+        [
+            AccessRule::GRANT,
+            TaoTestsRoles::RESTRICTED_TEST_AUTHOR,
+            ['ext' => 'taoTests', 'mod' => 'Tests']
+        ],
+        [
+            AccessRule::GRANT,
+            TaoTestsRoles::TEST_TRANSLATOR,
+            [
+                'ext' => 'tao',
+                'mod' => 'Translation'
+            ]
+        ]
     ],
     'optimizableClasses' => [
         'http://www.tao.lu/Ontologies/TAOTest.rdf#Test',
@@ -84,5 +133,10 @@ return [
 
         #BASE URL (usually the domain root)
         'BASE_URL' => ROOT_URL . 'taoTests/',
+    ],
+    'containerServiceProviders' => [
+        CopierServiceProvider::class,
+        TranslationServiceProvider::class,
+        FormServiceProvider::class,
     ],
 ];
